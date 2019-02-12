@@ -16,9 +16,7 @@
 title: FSharp Audio
 email: john.d.stovin@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Audio in FSharp, one sample at a time.
 baseurl: "/FSharpAudio"
 url: "https://johnstov.github.io"
 twitter_username: johnstovin    
