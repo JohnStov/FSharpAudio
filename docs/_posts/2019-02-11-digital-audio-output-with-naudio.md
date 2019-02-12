@@ -88,7 +88,7 @@ Now that we have a bundle containing one stream, we can create our output object
 let main argv =
     printfn "Starting playback"
 
-    let out = new WaveOutEvent()
+    use out = new WaveOutEvent()
     out.Init(new StreamProvider(bundle))
     out.Play()
     Thread.Sleep(1000)
@@ -99,4 +99,6 @@ let main argv =
     0 // return an integer exit code
 ```
 
-As you can see, we create the output object and then pass it a StreamProvider. Then we start playback, wait for one second and then stop playback. Although this produces no sound, if you put a breakpoint on the `silenceGenerator` function, you will see that it gets called repeatedly.
+As you can see, we create the output object and then pass it a StreamProvider. Note the `use` statement: `WaveOutEvent` implents `|IDisposable`, and this makes sure that the object is properly disposed when we leave scope.
+
+Then we start playback, wait for one second and then stop playback. Although this produces no sound, if you put a breakpoint on the `silenceGenerator` function, you will see that it gets called repeatedly.

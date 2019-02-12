@@ -14,7 +14,7 @@ let bundle = [stream]
 let main argv =
     printfn "Starting playback"
 
-    let out = new WaveOutEvent()
+    use out = new WaveOutEvent()
     out.Init(new StreamProvider(bundle))
     out.Play()
     Thread.Sleep(1000)
