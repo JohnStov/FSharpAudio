@@ -10,3 +10,5 @@ I'm going to use this repo and blog to develop an audio engine in FSharp and to 
 
 The spur for this is the [Applied FSharp Challenge](http://foundation.fsharp.org/applied_fsharp_challenge). If things work out, I will probably submit this.
 
+**Disclaimer:** *Some of the material that will be presented here is reworked from a workshop I presented at [FSharp Exchange 2018](https://skillsmatter.com/conferences/9419-f-sharp-exchange-2018)*
+
