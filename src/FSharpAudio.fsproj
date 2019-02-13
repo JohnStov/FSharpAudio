@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="AudioTypes.fs" />
     <Compile Include="StreamProvider.fs" />
+    <Compile Include="Generators.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

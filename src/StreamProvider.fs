@@ -20,14 +20,18 @@ type StreamProvider (streams: StreamBundle) =
     let enumerators = streams |> List.map (fun s -> s.data.GetEnumerator())
 
     let nextValue nStream = 
-        if enumerators.[nStream].MoveNext() then enumerators.[nStream].Current else 0.0
+        if enumerators.[nStream].MoveNext() then 
+            enumerators.[nStream].Current 
+        else 
+            0.0
+        |> (float32)
 
     interface IWaveProvider with
         member __.WaveFormat with get() = waveFormat
 
         member __.Read (buffer, offset, count) =
             // wrap the buffer in a span and then cast that to a span of float
-            let floatBuffer = MemoryMarshal.Cast<byte, float>(buffer.AsSpan(offset, count)) 
+            let floatBuffer = MemoryMarshal.Cast<byte, float32>(buffer.AsSpan(offset, count)) 
 
             for nSample in [0 .. floatBuffer.Length-1] do
                 floatBuffer.[nSample] <- nextValue (nSample % streams.Length)
