@@ -12,6 +12,7 @@ let main argv =
 
     use out = new WaveOutEvent()
     [noiseStream] |> StreamProvider |> out.Init
+
     out.Play()
     Thread.Sleep(2000)
     out.Stop()
