@@ -1,20 +1,20 @@
 ﻿// Learn more about F# at http://fsharp.org
 
-open NAudio.Wave
 open System.Threading
+open NAudio.Wave
 
+open Oscillator
 open AudioOut
-open Generators
 
 [<EntryPoint>]
 let main argv =
     printfn "Starting playback"
 
     use out = new WaveOutEvent()
-    [noiseStream] |> StreamProvider |> out.Init
+    [sine 440.0] |> StreamProvider |> out.Init
 
     out.Play()
-    Thread.Sleep(2000)
+    Thread.Sleep(5000)
     out.Stop()
 
     printfn "Playback finished"

@@ -1,19 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="AudioTypes.fs" />
     <Compile Include="StreamProvider.fs" />
     <Compile Include="Generators.fs" />
+    <Compile Include="Oscillator.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="NAudio" Version="1.8.5" />
   </ItemGroup>
-
 </Project>
