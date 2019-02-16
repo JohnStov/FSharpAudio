@@ -53,7 +53,9 @@ Since we are adding `AudioStream`s we need to do a bit of work to get hold of th
 let mix a b  =
     if a.sampleRate <> b.sampleRate then
             invalidArg "b" "All streams must have the same sample rate"
-    {a with data = Seq.zip a.data b.data |> Seq.map (fun (a, b) -> (a + b / 2.0))}
+    {a with data =
+         Seq.zip a.data b.data 
+         |> Seq.map (fun (a, b) -> (a + b / 2.0))}
 ```
 
 We take the two data streams and `zip` them to get a sequence of tuples of the pairwise values. `map` then applies a function to each tuple in turn, adding them and dividing by `2.0`
