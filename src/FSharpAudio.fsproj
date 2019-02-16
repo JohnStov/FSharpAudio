@@ -8,6 +8,7 @@
     <Compile Include="StreamProvider.fs" />
     <Compile Include="Generators.fs" />
     <Compile Include="Oscillator.fs" />
+    <Compile Include="Mixer.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
