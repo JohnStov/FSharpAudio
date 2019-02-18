@@ -34,7 +34,7 @@
 			"",
 			"    let enumerator = stream.GetEnumerator()",
 			"",
-			"    let nextValue =", 
+			"    let nextValue () =", 
 			"        if enumerator.MoveNext() then enumerator.Current else 0.0",
 			"        |> (float32)",
 			"",
@@ -46,7 +46,7 @@
 			"        let floatBuffer = MemoryMarshal.Cast<byte, float32>(buffer.AsSpan(offset, count)) ",
 			"",
 			"        for nSample in [0 .. floatBuffer.Length-1] do",
-			"            floatBuffer.[nSample] <- nextValue",
+			"            floatBuffer.[nSample] <- nextValue ()",
 			"",
 			"        // return the number of bytes written",
 			"        floatBuffer.Length * sizeof<float>"
