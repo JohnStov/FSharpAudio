@@ -138,7 +138,7 @@
 			"",
 			"let square = ",
 			"    let sq phase = ",
-			"        if phase < 0.0 then -1.0 else 1.0",
+			"        if phase < Math.PI then -1.0 else 1.0",
 			"    generate sq",
 			"",
 			"let ramp =",
@@ -150,7 +150,7 @@
 	"Stream Control" : {
 		"prefix": "a10",
 		"body": [
-			"let generate fn frequency = ",
+			"let generate fn (frequency : AudioStream) = ",
 			"    let fEnum = frequency.GetEnumerator()",
 			"    let frequency () = if fEnum.MoveNext() then fEnum.Current else 0.0",
 			"    let gen theta = ",
@@ -158,7 +158,7 @@
 			"        Some (fn theta, (theta + delta) % TWOPI)",
 			"    Seq.unfold gen 0.0",
 			"",
-			"let constant value = Seq.unfold (fun _ -> Some(value, ()) ()",
+			"let constant value = Seq.unfold (fun () -> Some(value, ())) ()",
 			"",
 			"let sine freq = generate Math.Sin freq",
 			"",
@@ -169,11 +169,18 @@
 			"",
 			"let ramp freq =",
 			"    let f phase = (phase / TWOPI) - 1.0",
-			"    generate freq",
+			"    generate f freq",
+			"",
+			"let mix s1 s2 = ",
+			"    Seq.zip s1 s2",
+			"    |> Seq.map (fun (s1, s2) -> (s1 + s2) / 2.0)",
+			"",
+			"let mix3 s1 s2 s3 = ",
+			"    mix (mix s1 s2) s3",
 			"",
 			"let cMajor wave = mix3 (wave (constant 261.63)) (wave (constant 329.63)) (wave (constant 392.00))"
 			],
-		"description": "Stream Controll"
+		"description": "Stream Control"
 	},
 	"Add and Multiply" : {
 		"prefix": "a11",
@@ -204,7 +211,7 @@
 		"prefix": "a13",
 		"body": [
 			"let modulator =",
-			"    sine (constant 10.0) |> multiply 10.0 |> add 440.0", 
+			"    sine (constant 5.0) |> multiply 15.0 |> add 440.0", 
 			"",
 			"let wobbly =",
 			"    sine modulator",
@@ -214,9 +221,9 @@
 	"Pluck" : {
 		"prefix": "a14",
 		"body": [
-			"let pluck sampleRate frequency =",
+			"let pluck frequency =",
 			"    // output frequency is determined by the length of the buffer",
-			"    let bufferLength = sampleRate / int frequency",
+			"    let bufferLength = SAMPLERATE / (int) frequency",
 			"    // start with noise",
 			"    let buffer = noise |> Seq.take bufferLength |> Seq.toArray",
 			"    // go round the buffer repeatedly, playing each sample,", 
