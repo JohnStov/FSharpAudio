@@ -1,0 +1,233 @@
+{
+	// Place your snippets for fsharp here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	"Type Definitions" : {
+		"prefix" : "a1",
+		"body" : [
+			"open System",
+			"",
+			"type AudioStream = float seq",
+			"let SAMPLERATE = 44100",
+			"let TWOPI = 2.0 * Math.PI"
+		],
+		"description": "AudioStream typedef"
+	},
+	"Stream Provider": {
+		"prefix": "a2",
+		"body": [
+			"open NAudio",
+			"",
+			"type StreamProvider (stream: AudioStream) = ",
+			"    let waveFormat = ",
+		   	"        WaveFormat.CreateIeeeFloatWaveFormat(SAMPLERATE, 1)",
+			"",
+			"    let enumerator = stream.GetEnumerator()",
+			"",
+			"    let nextValue () =", 
+			"        if enumerator.MoveNext() then enumerator.Current else 0.0",
+			"        |> (float32)",
+			"",
+			"    interface IWaveProvider with",
+			"        member __.WaveFormat with get() = waveFormat",
+			"",
+			"    member __.Read (buffer, offset, count) = ",
+			"        // wrap the buffer in a span and then cast that to a span of float",
+			"        let floatBuffer = MemoryMarshal.Cast<byte, float32>(buffer.AsSpan(offset, count)) ",
+			"",
+			"        for nSample in [0 .. floatBuffer.Length-1] do",
+			"            floatBuffer.[nSample] <- nextValue ()",
+			"",
+			"        // return the number of bytes written",
+			"        floatBuffer.Length * sizeof<float>"
+		],
+		"description": "Stream provider"
+	},
+	"Create silent stream" : {
+		"prefix": "a3",
+		"body": [
+			"let silence =", 
+			"    let silenceGenerator state = Some (0.0, state)",
+			"    Seq.unfold silenceGenerator ()"
+		],
+		"description": "Silence stream"
+	},
+	"Configure output" : {
+		"prefix": "a4",
+		"body": [
+			"[<EntryPoint>]",
+			"let main argv =",
+			"    printfn \"Starting playback\"",
+			"",
+			"    use out = new WaveOutEvent()",
+			"    silence |> StreamProvider |> out.Init",
+			"",			
+			"    out.Play()",
+			"    Console.ReadKey()",
+			"    out.Stop()",
+			"",
+			"    printfn \"Playback finished\"",
+			"",
+			"0 // return an integer exit code"
+		],
+		"description": "Program entry point"
+	},
+	"Create noise stream" : {
+		"prefix": "a5",
+		"body": [
+			"open System",
+			"",
+			"let noise =", 
+			"    let rnd = new Random()",
+			"    let rescale value = (value * 2.0)  - 1.0",
+			"    let noiseGenerator state = ",
+			"        Some (rnd.NextDouble() |> rescale, state)",
+			"",
+			"    Seq.unfold noiseGenerator ()"
+		],
+		"description": "Noise stream"
+	},
+	"Sine Oscillator" : {
+		"prefix": "a6",
+		"body": [
+			"let sine frequency = ",
+			"    let delta = TWOPI * frequency / (float) SAMPLERATE",
+			"    let gen theta = Some (Math.Sin theta, (theta + delta) % TWOPI)",
+			"    Seq.unfold gen 0.0",
+				],
+		"description": "Sine stream"
+	},
+	"Mixer" : {
+		"prefix": "a7",
+		"body": [
+			"let mix s1 s2 = ",
+			"    Seq.zip s1 s2",
+			"    |> Seq.map (fun (s1, s2) -> (s1 + s2) / 2.0)" 
+				],
+		"description": "Mix 2 streams"
+	},
+	"Mix3" : {
+		"prefix": "a8",
+		"body": [
+			"let mix3 s1 s2 s3 = ",
+			"    mix (mix s1 s2) s3",
+			"",
+			"let cMajor = (sine 261.63) (sine 329.63) (sine 392.00)"
+				],
+		"description": "Mix3 and C Major chord"
+	},
+	"Generator" : {
+		"prefix": "a9",
+		"body": [
+			"let generate fn frequency = ",
+			"    let delta = TWOPI * frequency / (float) SAMPLERATE",
+			"    let gen theta = Some (fn theta, (theta + delta) % TWOPI)",
+			"    Seq.unfold gen 0.0",
+			"",
+			"let sine = generate Math.Sin",
+			"",
+			"let square = ",
+			"    let sq phase = ",
+			"        if phase < 0.0 then -1.0 else 1.0",
+			"    generate sq",
+			"",
+			"let ramp =",
+			"    let f phase = (phase / TWOPI) - 1.0",
+			"    generate f"
+				],
+		"description": "Generator"
+	},
+	"Stream Control" : {
+		"prefix": "a10",
+		"body": [
+			"let generate fn frequency = ",
+			"    let fEnum = frequency.GetEnumerator()",
+			"    let frequency () = if fEnum.MoveNext() then fEnum.Current else 0.0",
+			"    let gen theta = ",
+			"        let delta = TWOPI * frequency () / (float) SAMPLERATE",
+			"        Some (fn theta, (theta + delta) % TWOPI)",
+			"    Seq.unfold gen 0.0",
+			"",
+			"let constant value = Seq.unfold (fun _ -> Some(value, ()) ()",
+			"",
+			"let sine freq = generate Math.Sin freq",
+			"",
+			"let square freq = ",
+			"    let sq phase = ",
+			"        if phase < Math.PI then -1.0 else 1.0",
+			"    generate sq freq",
+			"",
+			"let ramp freq =",
+			"    let f phase = (phase / TWOPI) - 1.0",
+			"    generate freq",
+			"",
+			"let cMajor wave = mix3 (wave (constant 261.63)) (wave (constant 329.63)) (wave (constant 392.00))"
+			],
+		"description": "Stream Controll"
+	},
+	"Add and Multiply" : {
+		"prefix": "a11",
+		"body": [
+			"let add value stream =",
+			"    stream |> Seq.map (fun s -> s + value)",
+			"",
+			"let multiply value stream =",
+			"    stream |> Seq.map (fun s -> s * value)"
+		],
+		"description": "Add And Multiply"
+	},
+	"Add and Multiply2" : {
+		"prefix": "a12",
+		"body": [
+			"let streamOp fn value stream =",
+			"    stream |> Seq.map (fun s -> fn s value)",
+			"",
+			"let add value stream =",
+			"    streamOp (+) value stream",
+			"",
+			"let multiply value stream =",
+			"    streamOp (*) value stream"
+		],
+		"description": "Add And Multiply2"
+	},
+	"Modulation" : {
+		"prefix": "a13",
+		"body": [
+			"let modulator =",
+			"    sine (constant 10.0) |> multiply 10.0 |> add 440.0", 
+			"",
+			"let wobbly =",
+			"    sine modulator",
+		],
+		"description": "Modulation"
+	},
+	"Pluck" : {
+		"prefix": "a14",
+		"body": [
+			"let pluck sampleRate frequency =",
+			"    // output frequency is determined by the length of the buffer",
+			"    let bufferLength = sampleRate / int frequency",
+			"    // start with noise",
+			"    let buffer = noise |> Seq.take bufferLength |> Seq.toArray",
+			"    // go round the buffer repeatedly, playing each sample,", 
+			"    // then averaging with previous and decaying",
+			"    let gen index =",
+			"        let nextIndex = (index + 1) % bufferLength",
+			"        let value = buffer.[nextIndex]",
+			"        buffer.[nextIndex] <- (value + buffer.[index]) / 2.0 * 0.996",
+			"        Some(value, nextIndex)",
+			"    Seq.unfold gen (bufferLength - 1)"		
+		],
+		"description": "Pluck"
+	}
+}
