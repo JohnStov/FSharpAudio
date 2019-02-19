@@ -142,35 +142,92 @@
 			"    generate sq",
 			"",
 			"let ramp =",
-			"    let f phase = (phase / TWOPI) -1.0",
+			"    let f phase = (phase / TWOPI) - 1.0",
 			"    generate f"
 				],
 		"description": "Generator"
 	},
-	"Modulation" : {
+	"Stream Control" : {
 		"prefix": "a10",
 		"body": [
 			"let generate fn frequency = ",
 			"    let fEnum = frequency.GetEnumerator()",
-			"    let frequency = if fEnum.MoveNext() then fEnum.Current else 0.0",
+			"    let frequency () = if fEnum.MoveNext() then fEnum.Current else 0.0",
 			"    let gen theta = ",
-			"        let delta = TWOPI * frequency / (float) SAMPLERATE",
+			"        let delta = TWOPI * frequency () / (float) SAMPLERATE",
 			"        Some (fn theta, (theta + delta) % TWOPI)",
 			"    Seq.unfold gen 0.0",
 			"",
-			"    let constant f = Seq.unfold (fun _ -> Some(f, ()) ()",
+			"let constant value = Seq.unfold (fun _ -> Some(value, ()) ()",
 			"",
-			"let sine = generate Math.Sin",
+			"let sine freq = generate Math.Sin freq",
 			"",
-			"let square = ",
+			"let square freq = ",
 			"    let sq phase = ",
-			"        if phase < 0.0 then -1.0 else 1.0",
-			"    generate sq",
+			"        if phase < Math.PI then -1.0 else 1.0",
+			"    generate sq freq",
 			"",
-			"let ramp =",
-			"    let f phase = (phase / TWOPI) -1.0",
-			"    generate f"
+			"let ramp freq =",
+			"    let f phase = (phase / TWOPI) - 1.0",
+			"    generate freq",
+			"",
+			"let cMajor wave = mix3 (wave (constant 261.63)) (wave (constant 329.63)) (wave (constant 392.00))"
 			],
-		"description": "Generator"
+		"description": "Stream Controll"
 	},
+	"Add and Multiply" : {
+		"prefix": "a11",
+		"body": [
+			"let add value stream =",
+			"    stream |> Seq.map (fun s -> s + value)",
+			"",
+			"let multiply value stream =",
+			"    stream |> Seq.map (fun s -> s * value)"
+		],
+		"description": "Add And Multiply"
+	},
+	"Add and Multiply2" : {
+		"prefix": "a12",
+		"body": [
+			"let streamOp fn value stream =",
+			"    stream |> Seq.map (fun s -> fn s value)",
+			"",
+			"let add value stream =",
+			"    streamOp (+) value stream",
+			"",
+			"let multiply value stream =",
+			"    streamOp (*) value stream"
+		],
+		"description": "Add And Multiply2"
+	},
+	"Modulation" : {
+		"prefix": "a13",
+		"body": [
+			"let modulator =",
+			"    sine (constant 10.0) |> multiply 10.0 |> add 440.0", 
+			"",
+			"let wobbly =",
+			"    sine modulator",
+		],
+		"description": "Modulation"
+	},
+	"Pluck" : {
+		"prefix": "a14",
+		"body": [
+			"let pluck sampleRate frequency =",
+			"    // output frequency is determined by the length of the buffer",
+			"    let bufferLength = sampleRate / int frequency",
+			"    // start with noise",
+			"    let buffer = noise |> Seq.take bufferLength |> Seq.toArray",
+			"    // go round the buffer repeatedly, playing each sample,", 
+			"    // then averaging with previous and decaying",
+			"    let gen index =",
+			"        let nextIndex = (index + 1) % bufferLength",
+			"        let value = buffer.[nextIndex]",
+			"        buffer.[nextIndex] <- (value + buffer.[index]) / 2.0 * 0.996",
+			"        Some(value, nextIndex)",
+			"    Seq.unfold gen (bufferLength - 1)"		
+		],
+		"description": "Pluck"
+	}
 }
