@@ -15,8 +15,6 @@
 	"Type Definitions" : {
 		"prefix" : "a1",
 		"body" : [
-			"open System",
-			"",
 			"type AudioStream = float seq",
 			"let SAMPLERATE = 44100",
 			"let TWOPI = 2.0 * Math.PI"
@@ -26,7 +24,8 @@
 	"Stream Provider": {
 		"prefix": "a2",
 		"body": [
-			"open NAudio",
+			"open NAudio.Wave",
+			"open System.Runtime.InteropServices",
 			"",
 			"type StreamProvider (stream: AudioStream) = ",
 			"    let waveFormat = ",
@@ -41,15 +40,15 @@
 			"    interface IWaveProvider with",
 			"        member __.WaveFormat with get() = waveFormat",
 			"",
-			"    member __.Read (buffer, offset, count) = ",
-			"        // wrap the buffer in a span and then cast that to a span of float",
-			"        let floatBuffer = MemoryMarshal.Cast<byte, float32>(buffer.AsSpan(offset, count)) ",
+			"        member __.Read (buffer, offset, count) = ",
+			"            // wrap the buffer in a span and then cast that to a span of float",
+			"            let floatBuffer = MemoryMarshal.Cast<byte, float32>(buffer.AsSpan(offset, count)) ",
 			"",
-			"        for nSample in [0 .. floatBuffer.Length-1] do",
-			"            floatBuffer.[nSample] <- nextValue ()",
+			"            for nSample in [0 .. floatBuffer.Length-1] do",
+			"                floatBuffer.[nSample] <- nextValue ()",
 			"",
-			"        // return the number of bytes written",
-			"        floatBuffer.Length * sizeof<float>"
+			"            // return the number of bytes written",
+			"            floatBuffer.Length * sizeof<float>"
 		],
 		"description": "Stream provider"
 	},
@@ -73,20 +72,18 @@
 			"    silence |> StreamProvider |> out.Init",
 			"",			
 			"    out.Play()",
-			"    Console.ReadKey()",
+			"    Console.ReadKey() |> ignore",
 			"    out.Stop()",
 			"",
 			"    printfn \"Playback finished\"",
 			"",
-			"0 // return an integer exit code"
+			"    0 // return an integer exit code"
 		],
 		"description": "Program entry point"
 	},
 	"Create noise stream" : {
 		"prefix": "a5",
 		"body": [
-			"open System",
-			"",
 			"let noise =", 
 			"    let rnd = new Random()",
 			"    let rescale value = (value * 2.0)  - 1.0",
@@ -119,10 +116,9 @@
 	"Mix3" : {
 		"prefix": "a8",
 		"body": [
-			"let mix3 s1 s2 s3 = ",
-			"    mix (mix s1 s2) s3",
+			"let mix3 s1 s2 s3 = mix (mix s1 s2) s3",
 			"",
-			"let cMajor = (sine 261.63) (sine 329.63) (sine 392.00)"
+			"let cMajor = mix3 (sine 261.63) (sine 329.63) (sine 392.00)"
 				],
 		"description": "Mix3 and C Major chord"
 	},
@@ -146,9 +142,16 @@
 			"    generate f"
 				],
 		"description": "Generator"
-	},
+    },
+    "Chord with wave": {
+        "prefix": "a10",
+		"body": [
+			"let cMajor wave = mix3 (wave 261.63) (wave 329.63) (wave 392.00)"
+        ],
+		"description": "Chord with wave"
+    },
 	"Stream Control" : {
-		"prefix": "a10",
+		"prefix": "a11",
 		"body": [
 			"let generate fn (frequency : AudioStream) = ",
 			"    let fEnum = frequency.GetEnumerator()",
@@ -175,15 +178,14 @@
 			"    Seq.zip s1 s2",
 			"    |> Seq.map (fun (s1, s2) -> (s1 + s2) / 2.0)",
 			"",
-			"let mix3 s1 s2 s3 = ",
-			"    mix (mix s1 s2) s3",
+			"let mix3 s1 s2 s3 = mix (mix s1 s2) s3",
 			"",
 			"let cMajor wave = mix3 (wave (constant 261.63)) (wave (constant 329.63)) (wave (constant 392.00))"
 			],
 		"description": "Stream Control"
 	},
 	"Add and Multiply" : {
-		"prefix": "a11",
+		"prefix": "a12",
 		"body": [
 			"let add value stream =",
 			"    stream |> Seq.map (fun s -> s + value)",
@@ -194,7 +196,7 @@
 		"description": "Add And Multiply"
 	},
 	"Add and Multiply2" : {
-		"prefix": "a12",
+		"prefix": "a13",
 		"body": [
 			"let streamOp fn value stream =",
 			"    stream |> Seq.map (fun s -> fn s value)",
@@ -208,7 +210,7 @@
 		"description": "Add And Multiply2"
 	},
 	"Modulation" : {
-		"prefix": "a13",
+		"prefix": "a14",
 		"body": [
 			"let modulator =",
 			"    sine (constant 5.0) |> multiply 15.0 |> add 440.0", 
@@ -219,7 +221,7 @@
 		"description": "Modulation"
 	},
 	"Pluck" : {
-		"prefix": "a14",
+		"prefix": "a15",
 		"body": [
 			"let pluck frequency =",
 			"    // output frequency is determined by the length of the buffer",
