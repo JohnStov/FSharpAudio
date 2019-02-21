@@ -150,8 +150,15 @@
         ],
 		"description": "Chord with wave"
     },
-	"Stream Control" : {
-		"prefix": "a11",
+		"Relative Major" : {
+			"prefix": "a11",
+			"body": [
+				"let major wave freq = mix3 (wave (constant freq)) (wave (constant (freq * 1.26))) (wave (constant (freq * 1.499)))"
+					],
+			"description": "Relative major chord"
+		},
+		"Stream Control" : {
+		"prefix": "a12",
 		"body": [
 			"let generate fn (frequency : AudioStream) = ",
 			"    let fEnum = frequency.GetEnumerator()",
@@ -185,7 +192,7 @@
 		"description": "Stream Control"
 	},
 	"Add and Multiply" : {
-		"prefix": "a12",
+		"prefix": "a13",
 		"body": [
 			"let add value stream =",
 			"    stream |> Seq.map (fun s -> s + value)",
@@ -196,7 +203,7 @@
 		"description": "Add And Multiply"
 	},
 	"Add and Multiply2" : {
-		"prefix": "a13",
+		"prefix": "a14",
 		"body": [
 			"let streamOp fn value stream =",
 			"    stream |> Seq.map (fun s -> fn s value)",
@@ -210,18 +217,25 @@
 		"description": "Add And Multiply2"
 	},
 	"Modulation" : {
-		"prefix": "a14",
+		"prefix": "a15",
 		"body": [
 			"let modulator =",
 			"    sine (constant 5.0) |> multiply 15.0 |> add 440.0", 
 			"",
 			"let wobbly =",
-			"    sine modulator",
+			"    sine modulator"
 		],
 		"description": "Modulation"
 	},
-	"Pluck" : {
-		"prefix": "a15",
+	"Relative Major Stream" : {
+		"prefix": "a16",
+		"body": [
+			"let major wave freq = mix3 (wave freq) (wave (multiply 1.26 freq)) (wave (multiply 1.499 freq))"
+		],
+		"description": "Relative major chord"
+	},
+  "Pluck" : {
+		"prefix": "a17",
 		"body": [
 			"let pluck frequency =",
 			"    // output frequency is determined by the length of the buffer",
