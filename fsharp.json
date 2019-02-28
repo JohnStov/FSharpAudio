@@ -85,7 +85,7 @@
 		"prefix": "a5",
 		"body": [
 			"let noise =", 
-			"    let rnd = new Random()",
+			"    let rnd = Random()",
 			"    let rescale value = (value * 2.0)  - 1.0",
 			"    let noiseGenerator state = ",
 			"        Some (rnd.NextDouble() |> rescale, state)",
